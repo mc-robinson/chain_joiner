@@ -6,73 +6,37 @@
 # Python Version: 3.6
 """
 Description:
+Makes the .ali alignment file needed to construct the homology model.
+Does this by aligning sequence from original pdb to fasta sequence.
 
-Usage: python make_alignment.py pdbfile.pdb pdbseq.seq fastafile.fasta
-
-Note: the PDB file must be in the same directory as this script.
+Usage: python make_alignment.py -p pdbfile.pdb -s pdbseq.seq -f fastafile.fasta
 """
 import sys
 import re
 import os 
 from biopandas.pdb import PandasPdb
 import pandas as pd
-
-with open(sys.argv[2]) as pdb_seq_file:
-    pdb_seq_data = pdb_seq_file.readlines()
-
-with open(sys.argv[3]) as fasta_file:
-    full_seq_data = fasta_file.readlines()
-
-#Use biopandas to create pandas dataframes of PDB info
-ppdb = PandasPdb()
-ppdb.read_pdb(sys.argv[1]) 
-atom_df = ppdb.df['ATOM']
-hetatm_df = ppdb.df['HETATM']
-others_df = ppdb.df['OTHERS'] #pandas dataframe with all the non-atom info in PDB file
-
-#get the last atom number before the ligands
-last_atom_num= atom_df['atom_number'].iloc[-1]
-
-#make atom_df so it contains both atoms and hetatms
-atom_df = pd.concat([hetatm_df, atom_df])
-#sort based on atom_number so it's in order
-atom_df = atom_df.sort_values(by=['atom_number'])
-#take out water molecules
-atom_df = atom_df.loc[atom_df['residue_name'] != 'HOH']
-#reset the indicies of the df
-atom_df = atom_df.reset_index(drop=True)
-
-#need to take out the ligand hetatms because they also have chain ID
-last_atom_idx = atom_df.loc[atom_df['atom_number']==last_atom_num].index
-atom_df = atom_df.iloc[:last_atom_idx[0]+1]
-
-#take off file ending to get pdb id
-pdb_id = os.path.splitext(os.path.basename(sys.argv[1]))[0]
+import argparse
 
 #list so can make chain dictionaries later
-chain_labels_l = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
+chain_labels_l = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'] 
 
-#make a dictionary for translating chain id's into A,B,C,D... as Modeller likes
-id_dict = {}
-id_list = list(atom_df['chain_id'])
-alphabet_idx = 0
-for i in range(1,len(list(id_list))):
-    if id_list[i] != id_list[i-1]:
-        id_dict[id_list[i-1]] = chain_labels_l[alphabet_idx] 
-        alphabet_idx = alphabet_idx + 1
-    if (i == len(list(id_list))-1):
-       id_dict[id_list[i]] = chain_labels_l[alphabet_idx]  
+def main(pdb_file, seq_file, fasta_file):
 
-#now change atom_df to have these labels
-atom_df['chain_id'] = atom_df['chain_id'].apply(lambda x: id_dict[x])
+    #Use biopandas to create pandas dataframes of PDB info
+    atom_df = make_atom_df(pdb_file)[0]
+    others_df = make_atom_df(pdb_file)[1]
 
+    #read in the sequence data
+    with open(seq_file) as pdb_seq_file:
+        pdb_seq_data = pdb_seq_file.readlines()
 
-def main():
+    with open(fasta_file) as fasta_file:
+        full_seq_data = fasta_file.readlines()
 
-    #get the sequences
+    #get the actual sequences
     pdb_seq = get_pdb_seq(pdb_seq_data)
     full_seq = get_full_seq(full_seq_data)
-
 
     #need to trim off ligand of pdb_seq
     ligand_str = trim_ligand_seq(pdb_seq)[1]
@@ -91,8 +55,11 @@ def main():
     pdb_seq_chain_dict = make_chain_dict(pdb_seq_l)
     full_seq_chain_dict = make_chain_dict(full_seq_l)
 
+    #get the translation table for chain id's 
+    id_dict = make_atom_df(pdb_file)[2]
+
     #get a dict of all the missing residues, keys are chain id, values are lists
-    missing_res_dict = make_missing_res_dict(others_df)
+    missing_res_dict = make_missing_res_dict(others_df, id_dict)
 
     #get a dict of just the res numbers
     missing_res_num_dict = make_res_num_dict(missing_res_dict)
@@ -132,7 +99,7 @@ def main():
             print(l)
 
             #get the seq residues flanking the break and the residues b/w which break occurs
-            flank_seq, gap_res, seq_before, seq_after = get_flank_seq(l,key) 
+            flank_seq, gap_res, seq_before, seq_after = get_flank_seq(atom_df, l, key) 
 
             # go to next loop if was an index error on the last one
             if flank_seq == '':
@@ -166,6 +133,9 @@ def main():
     pdb_seq_substr = split_sequence(pdb_seq)
     full_seq_substr = split_sequence(full_seq)
 
+    #take off file ending to get pdb id
+    pdb_id = os.path.splitext(os.path.basename(pdb_file))[0]
+
     #write the output file into the local directory
     aln_file = open((pdb_id + "_alignment.ali"),"w+")
 
@@ -183,6 +153,46 @@ def main():
     aln_file.write(full_seq_substr[-1]) #don't want to end with newline character
 
     aln_file.close()
+
+def make_atom_df(pdb_file):
+    #Use biopandas to create pandas dataframes of PDB info
+    ppdb = PandasPdb()
+    ppdb.read_pdb(pdb_file) 
+    atom_df = ppdb.df['ATOM']
+    hetatm_df = ppdb.df['HETATM']
+    others_df = ppdb.df['OTHERS'] #pandas dataframe with all the non-atom info in PDB file
+
+    #get the last atom number before the ligands
+    last_atom_num = atom_df['atom_number'].iloc[-1]
+
+    #make atom_df so it contains both atoms and hetatms
+    atom_df = pd.concat([hetatm_df, atom_df])
+    #sort based on atom_number so it's in order
+    atom_df = atom_df.sort_values(by=['atom_number'])
+    #take out water molecules
+    atom_df = atom_df.loc[atom_df['residue_name'] != 'HOH']
+    #reset the indicies of the df
+    atom_df = atom_df.reset_index(drop=True)
+
+    #need to take out the ligand hetatms because they also have chain ID
+    last_atom_idx = atom_df.loc[atom_df['atom_number']==last_atom_num].index
+    atom_df = atom_df.iloc[:last_atom_idx[0]+1]
+
+    #make a dictionary for translating chain id's into A,B,C,D... as Modeller likes
+    id_dict = {}
+    id_list = list(atom_df['chain_id'])
+    alphabet_idx = 0
+    for i in range(1,len(list(id_list))):
+        if id_list[i] != id_list[i-1]:
+            id_dict[id_list[i-1]] = chain_labels_l[alphabet_idx] 
+            alphabet_idx = alphabet_idx + 1
+        if (i == len(list(id_list))-1):
+           id_dict[id_list[i]] = chain_labels_l[alphabet_idx]
+
+    #now change atom_df to have labels modeller prefers
+    atom_df['chain_id'] = atom_df['chain_id'].apply(lambda x: id_dict[x])
+
+    return atom_df, others_df, id_dict
 
 def get_pdb_seq(pdb_seq_data):
     pdb_seq = ""
@@ -328,7 +338,7 @@ def find_missing_res_l(others_df):
     return new_missing_res_ls
 
 # make a dictionary with chain id's as the keys and list of missing res as the values
-def make_missing_res_dict(others_df):
+def make_missing_res_dict(others_df, id_dict):
 
     # first, get the missing_res_ls
     missing_res_ls = find_missing_res_l(others_df)
@@ -416,7 +426,7 @@ def get_flank_res_num_l(missing_res_loops):
         flank_res_l.append([loop[0]-1,loop[-1]+1])
     return flank_res_l
 
-def get_flank_seq(flank_res_num,key):
+def get_flank_seq(atom_df, flank_res_num, key):
 
     first_res_num = flank_res_num[0]
     second_res_num = flank_res_num[1]
@@ -479,4 +489,35 @@ def get_flank_seq(flank_res_num,key):
     return merged_seq, gap_res, res_before, res_after
 
 if __name__ == "__main__":
-    main()
+
+    parser = argparse.ArgumentParser(
+        prog='make_alignment.py',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=
+    """
+    Script to align sequence from original pdb to fasta sequence.
+    Returns the .ali alignment file needed to construct the homology model.
+
+    @author: Matt Robinson, matthew.robinson@yale.edu
+             William L. Jorgensen Lab, Yale University
+    
+    Usage: python make_alignment.py -p pdbfile.pdb -s pdbseq.seq -f fastafile.fasta
+
+    REQUIREMENTS:
+    Preferably Anaconda python 3 with following modules:
+        biopandas
+        pandas 
+        argparse
+    """
+    )
+
+    parser.add_argument(
+        "-p", "--pdb", help="full path of the pdb file with .pdb file descriptor")
+    parser.add_argument(
+        "-s", "--seq", help="full path of sequence file with .seq file descriptor")
+    parser.add_argument(
+        "-f", "--fasta", help="full path of fasta file with .fasta file descriptor")
+
+    args = parser.parse_args()
+
+    main(args.pdb, args.seq, args.fasta)
