@@ -13,21 +13,19 @@ sequence to model.
 
 The process of doing this is as follows:
 
-1. Call make_hetatm_seq.py to extract the sequence from the original PDB file with missing residues.
+1. Call make_seq.py to extract the sequence from the original PDB file with missing residues.
 
 2. Call make_alignment.py to create an alignment file, alignment.ali, between the original PDB structure
-with missing residues and the full sequence. 
+with missing residues and the full fasta sequence (usually available on PDB website). 
 
 3. Call make_model.py to create the actual homology model.
 
 Please see the headers of each of these scripts for more specific information.
 
-Usage: python chain_joiner.py pdb_filename.pdb fasta_filename.fasta [options]
+Usage: python chain_joiner.py -p pdbfile.pdb -f fastafile.fasta [options]
 
-For example, to make a loop model of PDB code 1qg8, I would call it as: 'python chain_joiner.py 1qg8.pdb 1qg8_full_seq.fasta -a'
-with both 1qg8.pdb and 1qg8_full_seq.fasta in the local directory. 
-
-Note: the PDB file and fasta file of the full sequence must be in this same directory as this code is run in. 
+For example, to make a loop model of PDB code 1qg8, I would call it as: 
+'python chain_joiner.py -p 1qg8.pdb -f 1qg8_full_seq.fasta -a'
 
 Input Arguments:
 [optional]
@@ -46,81 +44,98 @@ Input Arguments:
 Output: A set of PDB files (number depends on the chosen method)
 """
 
-import subprocess
-import sys, getopt
+import argparse
+import sys
 import os
 
-#Get the PDB id from the file
-pdb_id = os.path.splitext(os.path.basename(sys.argv[1]))[0]
+# import modules
+import make_seq
+import make_alignment
+import make_model
 
-def main(argv):
+def main(pdb_file, fasta_file, a, f, l):
 
-    try:                                
-        opts, args = getopt.getopt(argv, "afl", ["automodel", "fixed_automodel", "loopmodel"]) 
+    # Get the PDB id from the file
+    pdb_id = os.path.splitext(os.path.basename(pdb_file))[0]
 
-    except getopt.GetoptError:           
-        usage()                          
-        sys.exit(2) 
+    # get the sequence from the PDB file:
+    make_seq.main(pdb_file)
 
-    # make -a the default
-    if (opts == []):
-        opts = [('-a', '')]
+    # make the alignment file:
+    make_alignment.main(pdb_file, pdb_id + ".seq", fasta_file)
 
-    for opt, arg in opts:
+    # make the model
+    make_model.main(pdb_file, a=True, f=False, l=False)
 
-        if opt in ('-f','--fixed_automodel'):
-
-            #get the sequence from the PDB file:
-            subprocess.call(['python', 'make_hetatm_seq.py', str(sys.argv[1])])
-
-            #make the alignment file:
-            subprocess.call(['python', 'make_alignment.py', str(sys.argv[1]), pdb_id + ".seq", str(sys.argv[2])])
-
-            #make the model
-            subprocess.call(['python', 'make_model.py', str(sys.argv[1]),'-f'])
-
-        elif opt in ('-l','--loopmodel'):
-            
-            #get the sequence from the PDB file:
-            subprocess.call(['python', 'make_hetatm_seq.py', str(sys.argv[1])])
-
-            #make the alignment file:
-            subprocess.call(['python', 'make_alignment.py', str(sys.argv[1]), pdb_id + ".seq", str(sys.argv[2])])
-
-            #make the model
-            subprocess.call(['python', 'make_model.py', str(sys.argv[1]),'-l'])
-
-        else:
-            
-            #get the sequence from the PDB file:
-            subprocess.call(['python', 'make_hetatm_seq.py', str(sys.argv[1])])
-
-            #make the alignment file:
-            subprocess.call(['python', 'make_alignment.py', str(sys.argv[1]), pdb_id + ".seq", str(sys.argv[2])])
-
-            #make the model
-            subprocess.call(['python', 'make_model.py', str(sys.argv[1]),'-a'])
-
-    #make a folder for the output
+    # make a folder for the output
     dir_name = './' + pdb_id +'_output/'
     os.makedirs(dir_name)
 
-    #get a list of all output files in the working directory
+    # get a list of all output files in the working directory
     output_files = [filename for filename in os.listdir('.') if filename.startswith(pdb_id)]
-    #remove the folder name
+    # remove the folder name
     if (pdb_id + '_output') in output_files:
         output_files.remove(pdb_id + '_output')
 
-    #mv these files to the output folder
+    # mv these files to the output folder
     for file in output_files:
         try:
             os.system('mv ' + file + ' ./' + pdb_id + '_output/')   
         except:
             pass
 
-def usage():
-    print("Please see header of python script for details of proper usage")
-
-
 if __name__ == "__main__":
-    main(sys.argv[3:])
+
+    parser = argparse.ArgumentParser(
+        prog='make_model.py',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=
+    """
+    This script 'fills in' missing residues in PDB files and creates a fixed PDB file. 
+    In order to fill in the gaps, Modeller is used to create a homology model with the 
+    original PDB file serving as a template and the full sequence serving as the target 
+    sequence to model. 
+
+    The process of doing this is as follows:
+
+    1. Call make_seq.py to extract the sequence from
+       the original PDB file with missing residues.
+
+    2. Call make_alignment.py to create an alignment file, alignment.ali, 
+       between the original PDB structure with missing residues and the full
+       fasta sequence (usually available on PDB website). 
+
+    3. Call make_model.py to create the actual homology model.
+
+    Please see the headers of each of these scripts for more specific information.
+
+    Usage: python chain_joiner.py -p pdbfile.pdb -f fastafile.fasta [options]
+
+    For example, to make a loop model of PDB code 1qg8, I would call it as: 
+    'python chain_joiner.py -p 1qg8.pdb -f 1qg8_full_seq.fasta -a'
+
+    @author: Matt Robinson, matthew.robinson@yale.edu
+             William L. Jorgensen lab, Yale University
+    
+    REQUIREMENTS:
+    Preferably Anaconda python 3 with following modules:
+        argparse
+        modeller    
+    """
+    )
+
+    parser.add_argument(
+        "-p", "--pdb", help="path of the pdb file with .pdb file descriptor")
+    parser.add_argument(
+        "-f", "--fasta", help="path of the fasta file with .fasta file descriptor")
+    parser.add_argument(
+        "-a", "--automodel", help="the simplest method for simple comparitive modeling", action="store_true")
+    parser.add_argument(
+        "-fm", "--fixed_automodel", help="builds an automodel and keeps the non-missing residues fixed", action="store_true")
+    parser.add_argument(
+        "-l", "--loopmodel", help="builds a model by refining the loop with the missing residues", action="store_true")
+
+    args = parser.parse_args()
+
+    # call the main function
+    main(args.pdb, args.fasta, args.automodel, args.fixed_automodel, args.loopmodel)
