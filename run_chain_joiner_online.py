@@ -38,23 +38,6 @@ def main(pdb_id, a, fm, l):
     # run chain joiner
     chain_joiner.main(pdb_fn, fasta_fn, a, fm, l )
 
-    # # make a folder for the output
-    # dir_name = './' + pdb_id +'_output/'
-    # os.makedirs(dir_name)
-
-    # # get a list of all output files in the working directory
-    # output_files = [filename for filename in os.listdir('.') if filename.startswith(pdb_id)]
-    # # remove the folder name
-    # if (pdb_id + '_output') in output_files:
-    #     output_files.remove(pdb_id + '_output')
-
-    # # mv these files to the output folder
-    # for file in output_files:
-    #     try:
-    #         os.system('mv ' + file + ' ./' + pdb_id + '_output/')   
-    #     except:
-    #         pass
-
 if __name__ == "__main__":
 
     #create parser object
