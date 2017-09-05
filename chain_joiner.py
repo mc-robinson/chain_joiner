@@ -53,7 +53,7 @@ import make_seq
 import make_alignment
 import make_model
 
-def main(pdb_file, fasta_file, a, f, l):
+def main(pdb_file, fasta_file, a, fm, l):
 
     # Get the PDB id from the file
     pdb_id = os.path.splitext(os.path.basename(pdb_file))[0]
@@ -65,7 +65,7 @@ def main(pdb_file, fasta_file, a, f, l):
     make_alignment.main(pdb_file, pdb_id + ".seq", fasta_file)
 
     # make the model
-    make_model.main(pdb_file, a=True, f=False, l=False)
+    make_model.main(pdb_file, a, fm, l)
 
     # make a folder for the output
     dir_name = './' + pdb_id +'_output/'
