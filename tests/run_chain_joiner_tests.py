@@ -35,17 +35,30 @@ def run_tests():
 
         if mol == '1qg8':
 
-            # test_path = os.path.join(FILE_DIR, 'data', mol + '_fixed_automodel.pdb') 
+            test_path = os.path.join(FILE_DIR, 'test_files', mol + '_fixed_automodel.pdb') 
+            fixed_pdb_path = './' + mol + '_output/' + mol + '_fill.B99990001.pdb'
 
             # test fixed_automodel
             try:
                 chain_joiner.main(pdb_path, fasta_path, a=False, fm=True, l=False)
-            #     assert(os.path.getsize(pdb_path) == os.path.getsize(test_path))
-            #     assert(open(pdb_path,'r').read() == open(test_path,'r').read())
+                assert(os.path.getsize(test_path)==168437)
+                #assert(open(fixed_pdb_path,'r').read() == open(test_path,'r').read())
             except:
                 print("FIXED_AUTOMODEL FAILED ON " + mol)
                 passed_all_tests = False
+                sys.exit()
 
+            # remove folder (be carful with this)
+            os.system('rm -rf ' + './' + mol + '_output')
+
+            try:
+                chain_joiner.main(pdb_path, fasta_path, a=False, fm=False, l=True)
+            except:
+                print("LOOPMODEL FAILED ON " + mol)
+                passed_all_tests = False
+
+            # remove folder (be carful with this)
+            os.system('rm -rf ' + './' + mol + '_output')
 
         elif mol == '5uiq':
 
@@ -59,6 +72,9 @@ def run_tests():
             except:
                 print("AUTOMODEL FAILED ON " + mol)
                 passed_all_tests = False
+
+            # remove folder (be carful with this)
+            os.system('rm -rf ' + './' + mol + '_output')
 
     if passed_all_tests:
         print('PASSED ALL TESTS')
