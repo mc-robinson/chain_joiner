@@ -53,9 +53,9 @@ import os
 # from chain_joiner import make_alignment
 # from chain_joiner import make_model
 
-import make_seq
-import make_alignment
-import make_model
+from chain_joiner import make_seq
+from chain_joiner import make_alignment
+from chain_joiner import make_model
 
 def main():
 

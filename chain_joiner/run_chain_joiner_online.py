@@ -16,7 +16,7 @@ import sys
 import subprocess
 import argparse
 
-import chain_joiner
+from chain_joiner import chain_joiner
 
 def main():
     #create parser object
