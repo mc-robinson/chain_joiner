@@ -1,9 +1,6 @@
 # README #
 
-### What is this repository for? ###
+## chain_joiner: a python package to automatically fix chain breaks in PDB files using the homology modeling program MODELLER
 
-* Code to fix chain breaks in PDB files
-
-### Who do I talk to? ###
-
-* Matthew Robinson: matthew.robinson@yale.edu
+@author:
+Matt Robinson: `<matthew.robinson@yale.edu>`
