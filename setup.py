@@ -13,13 +13,14 @@ setup(
 	'Programming Language :: Python :: 3.6',
         'Topic :: Scientific/Engineering',
 	],
-  install_requires=['biopandas','modeller'],
+  install_requires=['biopandas'],
   entry_points={
         'console_scripts': [
             'chain_joiner=chain_joiner.chain_joiner:main',
 	    'make_seq=chain_joiner.make_seq:main',
 	    'make_alignment=chain_joiner.make_alignment:main',
             'make_model=chain_joiner.make_model:main',
+            'chain_joiner_online=chain_joiner.run_chain_joiner_online:main'
         ],
     },
 
