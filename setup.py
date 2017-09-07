@@ -16,7 +16,7 @@ setup(
   install_requires=['biopandas'],
   entry_points={
         'console_scripts': [
-            'chain_joiner=chain_joiner.chain_joiner:main',
+            'join_chains=chain_joiner.chain_joiner:main',
 	    'make_seq=chain_joiner.make_seq:main',
 	    'make_alignment=chain_joiner.make_alignment:main',
             'make_model=chain_joiner.make_model:main',
