@@ -1,9 +1,6 @@
-# README #
+# chain_joiner: a python package to automatically fix chain breaks in PDB files
+### author: ###
 
-## chain_joiner: a python package to automatically fix chain breaks in PDB files 
+* [Matt Robinson](https://github.com/mc-robinson) - `<matthew.robinson@yale.edu>`
 
 `chain_joiner` is built on top of the homology modeling program MODELLER. 
-
-@author:
-
-Matt Robinson, `<matthew.robinson@yale.edu>`
