@@ -49,42 +49,15 @@ import sys
 import os
 
 # import modules
-from chain_joiner import make_seq
-from chain_joiner import make_alignment
-from chain_joiner import make_model
+# from chain_joiner import make_seq
+# from chain_joiner import make_alignment
+# from chain_joiner import make_model
 
-def main(pdb_file, fasta_file, a, fm, l):
+import make_seq
+import make_alignment
+import make_model
 
-    # Get the PDB id from the file
-    pdb_id = os.path.splitext(os.path.basename(pdb_file))[0]
-
-    # get the sequence from the PDB file:
-    make_seq.main(pdb_file)
-
-    # make the alignment file:
-    make_alignment.main(pdb_file, pdb_id + ".seq", fasta_file)
-
-    # make the model
-    make_model.main(pdb_file, a, fm, l)
-
-    # make a folder for the output
-    dir_name = './' + pdb_id +'_output/'
-    os.makedirs(dir_name)
-
-    # get a list of all output files in the working directory
-    output_files = [filename for filename in os.listdir('.') if filename.startswith(pdb_id)]
-    # remove the folder name
-    if (pdb_id + '_output') in output_files:
-        output_files.remove(pdb_id + '_output')
-
-    # mv these files to the output folder
-    for file in output_files:
-        try:
-            os.system('mv ' + file + ' ./' + pdb_id + '_output/')   
-        except:
-            pass
-
-if __name__ == "__main__":
+def main():
 
     parser = argparse.ArgumentParser(
         prog='make_model.py',
@@ -137,5 +110,40 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    # call the main function
-    main(args.pdb, args.fasta, args.automodel, args.fixed_automodel, args.loopmodel)
+    # join the chains
+    join_chains(args.pdb, args.fasta, args.automodel, args.fixed_automodel, args.loopmodel)
+
+def join_chains(pdb_file, fasta_file, a, fm, l):
+
+    # Get the PDB id from the file
+    pdb_id = os.path.splitext(os.path.basename(pdb_file))[0]
+
+    # get the sequence from the PDB file:
+    make_seq.get_sequence(pdb_file)
+
+    # make the alignment file:
+    make_alignment.align(pdb_file, pdb_id + ".seq", fasta_file)
+
+    # make the model
+    make_model.model(pdb_file, a, fm, l)
+
+    # make a folder for the output
+    dir_name = './' + pdb_id +'_output/'
+    os.makedirs(dir_name)
+
+    # get a list of all output files in the working directory
+    output_files = [filename for filename in os.listdir('.') if filename.startswith(pdb_id)]
+    # remove the folder name
+    if (pdb_id + '_output') in output_files:
+        output_files.remove(pdb_id + '_output')
+
+    # mv these files to the output folder
+    for file in output_files:
+        try:
+            os.system('mv ' + file + ' ./' + pdb_id + '_output/')   
+        except:
+            pass
+
+if __name__ == "__main__":
+
+    main()

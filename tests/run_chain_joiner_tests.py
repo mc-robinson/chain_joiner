@@ -7,16 +7,18 @@
 # to get the module imports to work, need to add .. to python path
 import sys, os
 testdir = os.path.dirname(__file__)
-srcdir = '..'
+srcdir = '../chain_joiner/'
 sys.path.insert(0, os.path.abspath(os.path.join(testdir, srcdir)))
 
 # import the package
-import chain_joiner
+#import chain_joiner
 # import the modules
-from chain_joiner import chain_joiner
-from chain_joiner import run_chain_joiner_online
-# now import all functions
-#from LigParGen.Conve import *
+#from chain_joiner import chain_joiner
+#from chain_joiner import run_chain_joiner_online
+
+# chainged path so now import like that
+import chain_joiner
+import run_chain_joiner_online
 
 molecules_list = ['1qg8','5uiq']
 
@@ -40,7 +42,7 @@ def run_tests():
 
             # test fixed_automodel
             try:
-                chain_joiner.main(pdb_path, fasta_path, a=False, fm=True, l=False)
+                chain_joiner.join_chains(pdb_path, fasta_path, a=False, fm=True, l=False)
                 assert(os.path.getsize(test_path)==168437)
                 #assert(open(fixed_pdb_path,'r').read() == open(test_path,'r').read())
             except:
@@ -52,7 +54,7 @@ def run_tests():
             os.system('rm -rf ' + './' + mol + '_output')
 
             try:
-                chain_joiner.main(pdb_path, fasta_path, a=False, fm=False, l=True)
+                chain_joiner.join_chains(pdb_path, fasta_path, a=False, fm=False, l=True)
             except:
                 print("LOOPMODEL FAILED ON " + mol)
                 passed_all_tests = False
@@ -66,7 +68,7 @@ def run_tests():
 
             # test automodel
             try:
-                chain_joiner.main(pdb_path, fasta_path, a=True, fm=False, l=False)
+                chain_joiner.join_chains(pdb_path, fasta_path, a=True, fm=False, l=False)
                 # assert(os.path.getsize(pdb_path) == os.path.getsize(test_path))
                 # assert(open(pdb_path,'r').read() == open(test_path,'r').read())
             except:

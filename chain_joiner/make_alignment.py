@@ -21,7 +21,41 @@ import argparse
 #list so can make chain dictionaries later
 chain_labels_l = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'] 
 
-def main(pdb_file, seq_file, fasta_file):
+def main():
+
+    parser = argparse.ArgumentParser(
+        prog='make_alignment.py',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=
+    """
+    Script to align sequence from original pdb to fasta sequence.
+    Returns the .ali alignment file needed to construct the homology model.
+
+    @author: Matt Robinson, matthew.robinson@yale.edu
+             William L. Jorgensen Lab, Yale University
+    
+    Usage: python make_alignment.py -p pdbfile.pdb -s pdbseq.seq -f fastafile.fasta
+
+    REQUIREMENTS:
+    Preferably Anaconda python 3 with following modules:
+        biopandas
+        pandas 
+        argparse
+    """
+    )
+
+    parser.add_argument(
+        "-p", "--pdb", help="full path of the pdb file with .pdb file descriptor")
+    parser.add_argument(
+        "-s", "--seq", help="full path of sequence file with .seq file descriptor")
+    parser.add_argument(
+        "-f", "--fasta", help="full path of fasta file with .fasta file descriptor")
+
+    args = parser.parse_args()
+
+    align(args.pdb, args.seq, args.fasta)
+
+def align(pdb_file, seq_file, fasta_file):
 
     #Use biopandas to create pandas dataframes of PDB info
     atom_df = make_atom_df(pdb_file)[0]
@@ -489,35 +523,5 @@ def get_flank_seq(atom_df, flank_res_num, key):
     return merged_seq, gap_res, res_before, res_after
 
 if __name__ == "__main__":
-
-    parser = argparse.ArgumentParser(
-        prog='make_alignment.py',
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        description=
-    """
-    Script to align sequence from original pdb to fasta sequence.
-    Returns the .ali alignment file needed to construct the homology model.
-
-    @author: Matt Robinson, matthew.robinson@yale.edu
-             William L. Jorgensen Lab, Yale University
     
-    Usage: python make_alignment.py -p pdbfile.pdb -s pdbseq.seq -f fastafile.fasta
-
-    REQUIREMENTS:
-    Preferably Anaconda python 3 with following modules:
-        biopandas
-        pandas 
-        argparse
-    """
-    )
-
-    parser.add_argument(
-        "-p", "--pdb", help="full path of the pdb file with .pdb file descriptor")
-    parser.add_argument(
-        "-s", "--seq", help="full path of sequence file with .seq file descriptor")
-    parser.add_argument(
-        "-f", "--fasta", help="full path of fasta file with .fasta file descriptor")
-
-    args = parser.parse_args()
-
-    main(args.pdb, args.seq, args.fasta)
+    main()

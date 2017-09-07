@@ -35,7 +35,52 @@ import os
 from modeller import *
 from modeller.automodel import *    # Load the automodel class
 
-def main(pdb_file, a, f, l):
+def main():
+
+    parser = argparse.ArgumentParser(
+        prog='make_model.py',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=
+    """
+    This script uses the alignment file, alignment.ali, 
+    to make a homology model that includes the previously missing residues. 
+    In this case, the original PDB structure is the template
+    while the full sequence is the target of the model. 
+
+    @author: Matt Robinson, matthew.robinson@yale.edu
+             William L. Jorgensen lab, Yale University
+
+    For simple automodel,
+    Usage: python make_model.py -p pdbfile.pdb -a
+
+    For fixed automodel,
+    Usage: python make_model.py -p pdbfile.pdb -f
+
+    For loopmodel,
+    Usage: python make_model.py -p pdbfile.pdb -l
+    
+    REQUIREMENTS:
+    Preferably Anaconda python 3 with following modules:
+        argparse
+        modeller    
+    """
+    )
+
+    parser.add_argument(
+        "-p", "--pdb", help="full path of the pdb file with .pdb file descriptor")
+    parser.add_argument(
+        "-a", "--automodel", help="the simplest method for simple comparitive modeling", action="store_true")
+    parser.add_argument(
+        "-f", "--fixed_automodel", help="builds an automodel and keeps the non-missing residues fixed", action="store_true")
+    parser.add_argument(
+        "-l", "--loopmodel", help="builds a model by refining the loop with the missing residues", action="store_true")
+
+    args = parser.parse_args()
+
+    # call the model function
+    model(args.pdb, args.automodel, args.fixed_automodel, args.loopmodel)
+
+def model(pdb_file, a, f, l):
 
     log.verbose()
     env = environ()
@@ -163,8 +208,6 @@ def find_missing_residues(pdb_seq):
     print(missing_res_lists)
     return missing_res_lists            
 
-
-
 def make_sel_str(missing_res_ls):
     sel_str = ''
     for l in missing_res_ls:
@@ -193,46 +236,5 @@ def get_pdb_seq(aln_data):
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(
-        prog='make_model.py',
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        description=
-    """
-    This script uses the alignment file, alignment.ali, 
-    to make a homology model that includes the previously missing residues. 
-    In this case, the original PDB structure is the template
-    while the full sequence is the target of the model. 
-
-    @author: Matt Robinson, matthew.robinson@yale.edu
-             William L. Jorgensen lab, Yale University
-
-    For simple automodel,
-    Usage: python make_model.py -p pdbfile.pdb -a
-
-    For fixed automodel,
-    Usage: python make_model.py -p pdbfile.pdb -f
-
-    For loopmodel,
-    Usage: python make_model.py -p pdbfile.pdb -l
-    
-    REQUIREMENTS:
-    Preferably Anaconda python 3 with following modules:
-        argparse
-        modeller    
-    """
-    )
-
-    parser.add_argument(
-        "-p", "--pdb", help="full path of the pdb file with .pdb file descriptor")
-    parser.add_argument(
-        "-a", "--automodel", help="the simplest method for simple comparitive modeling", action="store_true")
-    parser.add_argument(
-        "-f", "--fixed_automodel", help="builds an automodel and keeps the non-missing residues fixed", action="store_true")
-    parser.add_argument(
-        "-l", "--loopmodel", help="builds a model by refining the loop with the missing residues", action="store_true")
-
-    args = parser.parse_args()
-
-    # call the main function
-    main(args.pdb, args.automodel, args.fixed_automodel, args.loopmodel)
+    main()
 

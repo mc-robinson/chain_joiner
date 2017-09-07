@@ -16,27 +16,7 @@ import os
 import argparse
 from modeller import *
 
-def main(pdb_file):
-
-    #Get the PDB id from the file (just strips off extension)
-    pdb_id = os.path.splitext(os.path.basename(pdb_file))[0]
-
-    # Get the sequence of the PDB file, and write to an alignment file
-    code = pdb_file
-
-    e = environ()
-
-    # directories for input atom files
-    e.io.atom_files_directory = ['.', '../atom_files']
-    # Read in HETATM records from template PDBs
-    e.io.hetatm = True
-
-    m = model(e, file=code)
-    aln = alignment(e)
-    aln.append_model(m, align_codes=code)
-    aln.write(file=pdb_id+'.seq')
-
-if __name__ == "__main__":
+def main():
 
     parser = argparse.ArgumentParser(
         prog='make_seq.py',
@@ -66,5 +46,29 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # call the main function
-    main(args.pdb)
+    get_sequence(args.pdb)
+
+def get_sequence(pdb_file):
+
+    #Get the PDB id from the file (just strips off extension)
+    pdb_id = os.path.splitext(os.path.basename(pdb_file))[0]
+
+    # Get the sequence of the PDB file, and write to an alignment file
+    code = pdb_file
+
+    e = environ()
+
+    # directories for input atom files
+    e.io.atom_files_directory = ['.', '../atom_files']
+    # Read in HETATM records from template PDBs
+    e.io.hetatm = True
+
+    m = model(e, file=code)
+    aln = alignment(e)
+    aln.append_model(m, align_codes=code)
+    aln.write(file=pdb_id+'.seq')
+
+if __name__ == "__main__":
+
+    main()
 

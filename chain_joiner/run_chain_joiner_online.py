@@ -18,28 +18,7 @@ import argparse
 
 import chain_joiner
 
-def main(pdb_id, a, fm, l):
-
-    # make url's for wget
-    pdb_url = 'https://files.rcsb.org/download/' + pdb_id + '.pdb'
-    # fasta_url = 'http://www.rcsb.org/pdb/download/viewFastaFiles.do?structureIdList=' + pdb_id + '&compressionType=uncompressed'
-    fasta_url = 'http://www.rcsb.org/pdb/download/viewFastaFiles.do?structureIdList=' + pdb_id
-
-    #make file names
-    pdb_fn = pdb_id + '.pdb'
-    fasta_fn = pdb_id + '.fasta'
-
-    #get the files from the pdb_database
-    os.system('wget --no-check-certificate -O ' + pdb_fn + ' ' + pdb_url)
-    os.system('wget -O ' + fasta_fn +'.gz ' + fasta_url + ' && gzip -d '+ fasta_fn +'.gz')
-    #os.system('wget -q -O - ' + fasta_url + ' | gzip -d > ' + fasta_fn)
-    #os.system('gzip -d ' + fasta_fn + '.gz')
-
-    # run chain joiner
-    chain_joiner.main(pdb_fn, fasta_fn, a, fm, l )
-
-if __name__ == "__main__":
-
+def main():
     #create parser object
     parser = argparse.ArgumentParser(
         prog='run_chain_joiner_online.py',
@@ -77,5 +56,29 @@ if __name__ == "__main__":
     #parse the arguments from standard input
     args = parser.parse_args()
 
-    # call the main function
-    main(args.pdb_id, args.automodel, args.fixed_automodel, args.loopmodel)
+    # call the model function
+    model(args.pdb_id, args.automodel, args.fixed_automodel, args.loopmodel)
+
+def model(pdb_id, a, fm, l):
+
+    # make url's for wget
+    pdb_url = 'https://files.rcsb.org/download/' + pdb_id + '.pdb'
+    # fasta_url = 'http://www.rcsb.org/pdb/download/viewFastaFiles.do?structureIdList=' + pdb_id + '&compressionType=uncompressed'
+    fasta_url = 'http://www.rcsb.org/pdb/download/viewFastaFiles.do?structureIdList=' + pdb_id
+
+    #make file names
+    pdb_fn = pdb_id + '.pdb'
+    fasta_fn = pdb_id + '.fasta'
+
+    #get the files from the pdb_database
+    os.system('wget --no-check-certificate -O ' + pdb_fn + ' ' + pdb_url)
+    os.system('wget -O ' + fasta_fn +'.gz ' + fasta_url + ' && gzip -d '+ fasta_fn +'.gz')
+    #os.system('wget -q -O - ' + fasta_url + ' | gzip -d > ' + fasta_fn)
+    #os.system('gzip -d ' + fasta_fn + '.gz')
+
+    # run chain joiner
+    chain_joiner.join_chains(pdb_fn, fasta_fn, a, fm, l )
+
+if __name__ == "__main__":
+
+    main()
