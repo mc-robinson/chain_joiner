@@ -31,6 +31,7 @@ Running with PDB and sequence files from the Protein Data Bank's website:
 Input Arguments:
 
 [options]
+
 `-a, --automodel`
     The simplest method for simple comparitive modeling. Will not give 
     great results but suggested when many chain breaks are present. [default: True]
