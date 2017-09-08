@@ -29,6 +29,7 @@ Running with PDB and sequence files from the Protein Data Bank's website:
 `chain_joiner_online -p PDB_ID [options]`
 
 Input Arguments:
+
 [options]
 `-a, --automodel`
     The simplest method for simple comparitive modeling. Will not give 
@@ -53,25 +54,14 @@ Using this method, conda will automatically install both biopandas and modeller,
 
 NOTE: one must first obtain a MODELLER license key (free for academic users) from the Sali lab's [website](https://salilab.org/modeller/registration.html). Then set this license equal to an enviroment variable called `KEY_MODELLER`.
 
-**USING PIP**
+**USING PIP:**
 
 One can also download chain_joiner from the Python Package Index (PyPI). 
 `pip install chain_joiner`
 However, this will require that both [MODELLER](https://salilab.org/modeller/9.19/release.html#anaconda) and [biopandas](https://github.com/rasbt/biopandas) are installed separetly. MODELLER, will likely involve a conda install anyway. So it is suggested you just install chain_joiner with conda, which will handle the MODELLER install automatically.
 
 ### References ###
-@article{raschkas2017biopandas,
-  doi = {10.21105/joss.00279},
-  url = {http://dx.doi.org/10.21105/joss.00279},
-  year  = {2017},
-  month = {jun},
-  publisher = {The Open Journal},
-  volume = {2},
-  number = {14},
-  author = {Sebastian Raschka},
-  title = {BioPandas: Working with molecular structures in pandas DataFrames},
-  journal = {The Journal of Open Source Software}
-}
+* Sebastian Raschka. Biopandas: Working with molecular structures in pandas dataframes. The Journal of Open Source Software, 2(14), jun 2017. doi: 10.21105/joss.00279. URL http://dx.doi.org/10.21105/joss.00279.
 * B. Webb, A. Sali. Comparative Protein Structure Modeling Using Modeller. Current Protocols in Bioinformatics, John Wiley & Sons, Inc., 5.6.1-5.6.32, 2014.
 
 ### Contact ###
