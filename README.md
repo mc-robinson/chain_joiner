@@ -7,7 +7,7 @@
 
 chain_joiner 'fills in' missing residues in PDB files and creates a new, fixed PDB file. The package mainly uses MODELLER, a homology and comparitive modelling program created by the Sali lab at UCSF. In order to fill in the missing residue gaps, MODELLER is used to create a homology model with the original PDB file serving as a template and the full sequence serving as the target sequence to model. 
 
-The process of doing adding in the missing residues is highly based on this [helpful tutorial on the Sali lab's website](https://salilab.org/modeller/wiki/Missing%20residues):
+The process of adding in the missing residues is highly based on this [helpful tutorial on the Sali lab's website](https://salilab.org/modeller/wiki/Missing%20residues):
 
 1. Use Modeller to extract the sequence from the original PDB file with missing residues.
 
@@ -16,7 +16,7 @@ with missing residues and the full fasta sequence (usually available on PDB webs
 
 3. Use Modeller to create the actual homology model.
 
-NOTE: The way the alignment file is constructed is not guarenteed to work for every possible protein. It is often a good idea to check the automatically generated alignment file if the output seems suspect. Also, the results of chain_joiner will not be that great if the loop is of substantial size. For this, more detailed homology modelling is likely needed. 
+NOTE: The way the alignment file is constructed in chain_joiner is not guarenteed to work for every possible protein. It is often a good idea to check the automatically generated alignment file if the output seems suspect. Also, the results of chain_joiner will not be that great if the loop is of substantial size. For this, more detailed homology modelling is likely needed. All of the mistakes are my own and not due to MODELLER.
 
 ### Usage ####
 
